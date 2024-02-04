@@ -156,3 +156,36 @@ func TestAlgorithm_UnmarshalJSON(t *testing.T) {
 		})
 	}
 }
+
+func TestAlgorithm_GenerateKeyPairsInBytesECC(t *testing.T) {
+	keyPair, err := Algorithm(1).GenerateKeyPairsInBytes()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if len(keyPair.PrivateKey) == 0 {
+		t.Errorf("ECC private key is absent")
+	}
+	if len(keyPair.PublicKey) == 0 {
+		t.Errorf("ECC public key is absent")
+	}
+}
+
+func TestAlgorithm_GenerateKeyPairsInBytesRSA(t *testing.T) {
+	keyPair, err := Algorithm(2).GenerateKeyPairsInBytes()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if len(keyPair.PrivateKey) == 0 {
+		t.Errorf("RSA private key is absent")
+	}
+	if len(keyPair.PublicKey) == 0 {
+		t.Errorf("RSA public key is absent")
+	}
+}
+
+func TestAlgorithm_GenerateKeyPairsInBytesInvalid(t *testing.T) {
+	_, err := Algorithm(0).GenerateKeyPairsInBytes()
+	if err == nil {
+		t.Errorf("error should present for invalid algorithm")
+	}
+}

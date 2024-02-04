@@ -2,7 +2,9 @@ package domain
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
 	"strings"
 )
 
@@ -23,10 +25,12 @@ var algorithmValue = map[string]uint8{
 	"rsa": 2,
 }
 
+// String representation of Algorithm object
 func (algorithm Algorithm) String() string {
 	return algorithmName[uint8(algorithm)]
 }
 
+// ParseAlgorithm from string
 func ParseAlgorithm(s string) (Algorithm, error) {
 	s = strings.TrimSpace(strings.ToLower(s))
 	value, found := algorithmValue[s]
@@ -36,10 +40,12 @@ func ParseAlgorithm(s string) (Algorithm, error) {
 	return Algorithm(value), nil
 }
 
+// MarshalJSON converts Algorithm to string representation for client
 func (algorithm Algorithm) MarshalJSON() ([]byte, error) {
 	return json.Marshal(algorithm.String())
 }
 
+// UnmarshalJSON converts user's string input to Algorithm object
 func (algorithm *Algorithm) UnmarshalJSON(data []byte) (err error) {
 	var stringValue string
 	if err = json.Unmarshal(data, &stringValue); err != nil {
@@ -49,4 +55,69 @@ func (algorithm *Algorithm) UnmarshalJSON(data []byte) (err error) {
 		return err
 	}
 	return nil
+}
+
+type KeyPairInBytes struct {
+	PrivateKey []byte
+	PublicKey  []byte
+}
+
+// GenerateKeyPairsInBytes depending on Algorithm type returns KeyPairInBytes for storing
+func (algorithm Algorithm) GenerateKeyPairsInBytes() (*KeyPairInBytes, error) {
+	switch algorithm {
+	case ECC:
+		return eccKeyPairInBytesGenerator{
+			marshaler: crypto.NewECCMarshaler(),
+			generator: &crypto.ECCGenerator{},
+		}.generateECCKeyPairInBytes()
+	case RSA:
+		return rsaKeyPairInBytesGenerator{
+			marshaler: crypto.NewRSAMarshaler(),
+			generator: &crypto.RSAGenerator{},
+		}.generateRSAKeyPairInBytes()
+	default:
+		return nil, errors.New("invalid algorithm")
+	}
+}
+
+type eccKeyPairInBytesGenerator struct {
+	marshaler crypto.ECCMarshaler
+	generator *crypto.ECCGenerator
+}
+
+func (keyPairGenerator eccKeyPairInBytesGenerator) generateECCKeyPairInBytes() (*KeyPairInBytes, error) {
+	eccKeyPair, err := keyPairGenerator.generator.Generate()
+	if err != nil {
+		panic("error during ECC key generation")
+	}
+
+	privateKey, publicKey, err := keyPairGenerator.marshaler.Encode(*eccKeyPair)
+	if err != nil {
+		return nil, err
+	}
+	return &KeyPairInBytes{
+		PrivateKey: privateKey,
+		PublicKey:  publicKey,
+	}, nil
+}
+
+type rsaKeyPairInBytesGenerator struct {
+	marshaler crypto.RSAMarshaler
+	generator *crypto.RSAGenerator
+}
+
+func (keyPairGenerator rsaKeyPairInBytesGenerator) generateRSAKeyPairInBytes() (*KeyPairInBytes, error) {
+	rsaKeyPair, err := keyPairGenerator.generator.Generate()
+	if err != nil {
+		panic("error during RSA key generation")
+	}
+
+	privateKey, publicKey, err := keyPairGenerator.marshaler.Marshal(*rsaKeyPair)
+	if err != nil {
+		return nil, err
+	}
+	return &KeyPairInBytes{
+		PrivateKey: privateKey,
+		PublicKey:  publicKey,
+	}, nil
 }

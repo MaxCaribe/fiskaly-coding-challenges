@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestDevicesRepository_GetSuccessful(t *testing.T) {
+func TestInMemoryDevicesRepository_GetSuccessful(t *testing.T) {
 	device := domain.SignatureDevice{UUID: uuid.NewString()}
 	repo := seededRepo([]domain.SignatureDevice{device})
 
@@ -17,7 +17,7 @@ func TestDevicesRepository_GetSuccessful(t *testing.T) {
 	}
 }
 
-func TestDevicesRepository_GetNotFound(t *testing.T) {
+func TestInMemoryDevicesRepository_GetNotFound(t *testing.T) {
 	device := domain.SignatureDevice{UUID: uuid.NewString()}
 	repo := seededRepo([]domain.SignatureDevice{})
 
@@ -28,7 +28,7 @@ func TestDevicesRepository_GetNotFound(t *testing.T) {
 	}
 }
 
-func TestDevicesRepository_GetAll(t *testing.T) {
+func TestInMemoryDevicesRepository_GetAll(t *testing.T) {
 	devices := []domain.SignatureDevice{
 		domain.SignatureDevice{UUID: uuid.NewString()},
 		domain.SignatureDevice{UUID: uuid.NewString()},
@@ -44,7 +44,7 @@ func TestDevicesRepository_GetAll(t *testing.T) {
 	}
 }
 
-func TestDevicesRepository_CreateSuccessful(t *testing.T) {
+func TestInMemoryDevicesRepository_CreateSuccessful(t *testing.T) {
 	repo := seededRepo([]domain.SignatureDevice{})
 	device := domain.SignatureDevice{UUID: uuid.NewString()}
 
@@ -58,7 +58,7 @@ func TestDevicesRepository_CreateSuccessful(t *testing.T) {
 	}
 }
 
-func TestDevicesRepository_CreateDuplicateError(t *testing.T) {
+func TestInMemoryDevicesRepository_CreateDuplicateError(t *testing.T) {
 	repo := seededRepo([]domain.SignatureDevice{})
 	device := domain.SignatureDevice{UUID: uuid.NewString()}
 	err := repo.Create(device)
@@ -72,7 +72,7 @@ func TestDevicesRepository_CreateDuplicateError(t *testing.T) {
 	}
 }
 
-func TestDevicesRepository_UpdateSuccessful(t *testing.T) {
+func TestInMemoryDevicesRepository_UpdateSuccessful(t *testing.T) {
 	device := domain.SignatureDevice{UUID: uuid.NewString()}
 	repo := seededRepo([]domain.SignatureDevice{device})
 	device.Label = "label"
@@ -88,7 +88,7 @@ func TestDevicesRepository_UpdateSuccessful(t *testing.T) {
 	}
 }
 
-func TestDevicesRepository_UpdateNotFound(t *testing.T) {
+func TestInMemoryDevicesRepository_UpdateNotFound(t *testing.T) {
 	repo := seededRepo([]domain.SignatureDevice{})
 	device := domain.SignatureDevice{UUID: uuid.NewString()}
 	device.Label = "label"
@@ -99,8 +99,8 @@ func TestDevicesRepository_UpdateNotFound(t *testing.T) {
 	}
 }
 
-func seededRepo(devices []domain.SignatureDevice) *DevicesRepository {
-	repo := NewDevicesRepository()
+func seededRepo(devices []domain.SignatureDevice) *InMemoryDevicesRepository {
+	repo := NewInMemoryDevicesRepository()
 	for _, device := range devices {
 		repo.storage[device.UUID] = device
 	}

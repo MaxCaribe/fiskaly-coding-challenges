@@ -6,22 +6,22 @@ import (
 	"sync"
 )
 
-type DevicesRepository struct {
+type InMemoryDevicesRepository struct {
 	storage map[string]domain.SignatureDevice
 	mutex   sync.Mutex
 }
 
-func NewDevicesRepository() *DevicesRepository {
-	repo := DevicesRepository{storage: make(map[string]domain.SignatureDevice)}
+func NewInMemoryDevicesRepository() *InMemoryDevicesRepository {
+	repo := InMemoryDevicesRepository{storage: make(map[string]domain.SignatureDevice)}
 	return &repo
 }
 
-func (repository *DevicesRepository) Get(uuid string) (domain.SignatureDevice, bool) {
+func (repository *InMemoryDevicesRepository) Get(uuid string) (domain.SignatureDevice, bool) {
 	device, found := repository.storage[uuid]
 	return device, found
 }
 
-func (repository *DevicesRepository) GetAll() []domain.SignatureDevice {
+func (repository *InMemoryDevicesRepository) GetAll() []domain.SignatureDevice {
 	devices := make([]domain.SignatureDevice, 0, len(repository.storage))
 	for _, device := range repository.storage {
 		devices = append(devices, device)
@@ -29,7 +29,7 @@ func (repository *DevicesRepository) GetAll() []domain.SignatureDevice {
 	return devices
 }
 
-func (repository *DevicesRepository) Create(device domain.SignatureDevice) error {
+func (repository *InMemoryDevicesRepository) Create(device domain.SignatureDevice) error {
 	repository.mutex.Lock()
 	defer repository.mutex.Unlock()
 
@@ -40,7 +40,7 @@ func (repository *DevicesRepository) Create(device domain.SignatureDevice) error
 	return nil
 }
 
-func (repository *DevicesRepository) Update(device domain.SignatureDevice) error {
+func (repository *InMemoryDevicesRepository) Update(device domain.SignatureDevice) error {
 	repository.mutex.Lock()
 	defer repository.mutex.Unlock()
 
