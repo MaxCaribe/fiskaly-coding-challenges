@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"crypto/ecdsa"
+	"crypto/rand"
 	"crypto/sha256"
 )
 
@@ -25,7 +26,7 @@ func (signer *SignerECDSA) Sign(dataToBeSigned []byte) ([]byte, error) {
 	}
 
 	hashedData := sha256.Sum256(dataToBeSigned)
-	signedData, err := ecdsa.SignASN1(nil, keyPair.Private, hashedData[:])
+	signedData, err := ecdsa.SignASN1(rand.Reader, keyPair.Private, hashedData[:])
 	if err != nil {
 		return nil, err
 	}

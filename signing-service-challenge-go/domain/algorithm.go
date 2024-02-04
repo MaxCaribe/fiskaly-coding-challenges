@@ -91,7 +91,7 @@ func (keyPairGenerator eccKeyPairInBytesGenerator) generateECCKeyPairInBytes() (
 		panic("error during ECC key generation")
 	}
 
-	privateKey, publicKey, err := keyPairGenerator.marshaler.Encode(*eccKeyPair)
+	publicKey, privateKey, err := keyPairGenerator.marshaler.Encode(*eccKeyPair)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (keyPairGenerator rsaKeyPairInBytesGenerator) generateRSAKeyPairInBytes() (
 		panic("error during RSA key generation")
 	}
 
-	privateKey, publicKey, err := keyPairGenerator.marshaler.Marshal(*rsaKeyPair)
+	publicKey, privateKey, err := keyPairGenerator.marshaler.Marshal(*rsaKeyPair)
 	if err != nil {
 		return nil, err
 	}
@@ -120,4 +120,17 @@ func (keyPairGenerator rsaKeyPairInBytesGenerator) generateRSAKeyPairInBytes() (
 		PrivateKey: privateKey,
 		PublicKey:  publicKey,
 	}, nil
+}
+
+func (algorithm Algorithm) Signer(privateKey []byte) (crypto.Signer, error) {
+	switch algorithm {
+	case ECC:
+		marshaler := crypto.NewECCMarshaler()
+		return crypto.NewSignerECDSA(privateKey, &marshaler), nil
+	case RSA:
+		marshaler := crypto.NewRSAMarshaler()
+		return crypto.NewSignerRSA(privateKey, &marshaler), nil
+	default:
+		return nil, errors.New("invalid algorithm")
+	}
 }
