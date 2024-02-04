@@ -1,7 +1,6 @@
 package persistence
 
 import (
-	"fmt"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
 	"github.com/google/uuid"
 	"testing"
@@ -14,7 +13,7 @@ func TestDevicesRepository_GetSuccessful(t *testing.T) {
 	foundDevice, _ := repo.Get(device.UUID)
 
 	if foundDevice.UUID != device.UUID {
-		fmt.Errorf("couldn't retrieve signature device")
+		t.Errorf("couldn't retrieve signature device")
 	}
 }
 
@@ -25,7 +24,7 @@ func TestDevicesRepository_GetNotFound(t *testing.T) {
 	_, found := repo.Get(device.UUID)
 
 	if found {
-		fmt.Errorf("device should not present in repository")
+		t.Errorf("device should not present in repository")
 	}
 }
 
@@ -41,7 +40,7 @@ func TestDevicesRepository_GetAll(t *testing.T) {
 	repo := seededRepo(devices)
 	foundDevices := repo.GetAll()
 	if len(foundDevices) != len(devices) || len(foundDevices) == 0 {
-		fmt.Errorf("incorrect amount of devices returned")
+		t.Errorf("incorrect amount of devices returned")
 	}
 }
 
@@ -51,11 +50,11 @@ func TestDevicesRepository_CreateSuccessful(t *testing.T) {
 
 	err := repo.Create(device)
 	if err != nil {
-		fmt.Errorf(err.Error())
+		t.Errorf(err.Error())
 	}
 	_, found := repo.storage[device.UUID]
 	if !found {
-		fmt.Errorf("device wasn't saved")
+		t.Errorf("device wasn't saved")
 	}
 }
 
@@ -64,12 +63,12 @@ func TestDevicesRepository_CreateDuplicateError(t *testing.T) {
 	device := domain.SignatureDevice{UUID: uuid.NewString()}
 	err := repo.Create(device)
 	if err != nil {
-		fmt.Errorf(err.Error())
+		t.Errorf(err.Error())
 	}
 
 	err = repo.Create(device)
 	if err == nil {
-		fmt.Errorf("should not be allowed to save multiple devices with same uuid")
+		t.Errorf("should not be allowed to save multiple devices with same uuid")
 	}
 }
 
@@ -80,12 +79,12 @@ func TestDevicesRepository_UpdateSuccessful(t *testing.T) {
 
 	err := repo.Update(device)
 	if err != nil {
-		fmt.Errorf(err.Error())
+		t.Errorf(err.Error())
 	}
 
 	updatedDevice := repo.storage[device.UUID]
 	if updatedDevice.Label != device.Label || updatedDevice.Label == "" {
-		fmt.Errorf("device wasn't saved")
+		t.Errorf("device wasn't saved")
 	}
 }
 
@@ -96,7 +95,7 @@ func TestDevicesRepository_UpdateNotFound(t *testing.T) {
 
 	err := repo.Update(device)
 	if err == nil {
-		fmt.Errorf("no such device to update")
+		t.Errorf("no such device to update")
 	}
 }
 
