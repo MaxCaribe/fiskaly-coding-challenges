@@ -23,6 +23,12 @@ func (repo *testRepository) Update(device SignatureDevice) error {
 	repo.storage[device.UUID] = device
 	return nil
 }
+func (repo *testRepository) IncrementCounter(uuid string) error {
+	device := repo.storage[uuid]
+	device.SignatureCounter += 1
+	repo.storage[uuid] = device
+	return nil
+}
 
 func TestCreateSignatureDeviceECC(t *testing.T) {
 	repo := testRepository{storage: make(map[string]SignatureDevice)}

@@ -50,3 +50,15 @@ func (repository *InMemoryDevicesRepository) Update(device domain.SignatureDevic
 	repository.storage[device.UUID] = device
 	return nil
 }
+
+func (repository *InMemoryDevicesRepository) IncrementCounter(uuid string) error {
+	repository.mutex.Lock()
+	defer repository.mutex.Unlock()
+	device, found := repository.storage[uuid]
+	if !found {
+		return fmt.Errorf(`device with UUID "%q" doesn't exists`, uuid)
+	}
+	device.SignatureCounter += 1
+	repository.storage[uuid] = device
+	return nil
+}

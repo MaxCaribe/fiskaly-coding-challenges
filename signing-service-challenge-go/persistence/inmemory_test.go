@@ -107,3 +107,28 @@ func seededRepo(devices []domain.SignatureDevice) *InMemoryDevicesRepository {
 
 	return repo
 }
+
+func TestInMemoryDevicesRepository_IncrementCounterSuccessful(t *testing.T) {
+	device := domain.SignatureDevice{UUID: uuid.NewString()}
+	repo := seededRepo([]domain.SignatureDevice{device})
+
+	err := repo.IncrementCounter(device.UUID)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	updatedDevice := repo.storage[device.UUID]
+	if updatedDevice.SignatureCounter != 1 {
+		t.Errorf("signature counter wasn't incremented")
+	}
+}
+
+func TestInMemoryDevicesRepository_IncrementCounterNotFound(t *testing.T) {
+	device := domain.SignatureDevice{UUID: uuid.NewString()}
+	repo := seededRepo([]domain.SignatureDevice{})
+
+	err := repo.IncrementCounter(device.UUID)
+	if err == nil {
+		t.Errorf("no such device to update")
+	}
+}

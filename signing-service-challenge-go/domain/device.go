@@ -22,6 +22,7 @@ type DevicesRepository interface {
 	GetAll() []SignatureDevice
 	Create(device SignatureDevice) error
 	Update(device SignatureDevice) error
+	IncrementCounter(uuid string) error
 }
 
 type CreateSignatureDeviceResponse struct {
@@ -91,9 +92,13 @@ func SignTransaction(id string, data string, repo DevicesRepository) (SignatureR
 		return SignatureResponse{}, err
 	}
 
-	device.SignatureCounter += 1
 	device.LastSignature = signedData
 	err = repo.Update(device)
+	if err != nil {
+		return SignatureResponse{}, err
+	}
+	// increment as separate action, so we make sure it has the latest value
+	err = repo.IncrementCounter(device.UUID)
 	if err != nil {
 		return SignatureResponse{}, err
 	}
