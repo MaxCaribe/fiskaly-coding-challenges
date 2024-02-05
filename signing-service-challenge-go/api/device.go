@@ -24,7 +24,7 @@ func (s *Server) Devices(response http.ResponseWriter, request *http.Request) {
 func (s *Server) Device(response http.ResponseWriter, request *http.Request) {
 	switch request.Method {
 	case "GET":
-		s.getAllSignatureDevices(response, request)
+		s.getSignatureDevice(response, request)
 	default:
 		WriteErrorResponse(response, 404, []string{"not found"})
 	}
