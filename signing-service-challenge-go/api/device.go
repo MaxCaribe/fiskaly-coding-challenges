@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
+	"github.com/gorilla/mux"
 	"io"
 	"net/http"
 )
@@ -39,14 +40,14 @@ func (s *Server) DeviceSign(response http.ResponseWriter, request *http.Request)
 	}
 }
 
-func (s *Server) getAllSignatureDevices(response http.ResponseWriter, request *http.Request) {
+func (s *Server) getAllSignatureDevices(response http.ResponseWriter, _ *http.Request) {
 	devices := s.devicesRepository.GetAll()
 	WriteAPIResponse(response, 200, devices)
 }
 
 type createSignatureDeviceParams struct {
-	algorithm domain.Algorithm
-	label     string
+	Algorithm domain.Algorithm `json:"algorithm"`
+	Label     string           `json:"label"`
 }
 
 func (s *Server) createSignatureDevice(response http.ResponseWriter, request *http.Request) {
@@ -58,7 +59,7 @@ func (s *Server) createSignatureDevice(response http.ResponseWriter, request *ht
 		return
 	}
 
-	device, err := domain.CreateSignatureDevice(params.algorithm, params.label, s.devicesRepository)
+	device, err := domain.CreateSignatureDevice(params.Algorithm, params.Label, s.devicesRepository)
 	if err != nil {
 		WriteErrorResponse(response, 400, []string{err.Error()})
 		return
@@ -68,8 +69,9 @@ func (s *Server) createSignatureDevice(response http.ResponseWriter, request *ht
 }
 
 func (s *Server) getSignatureDevice(response http.ResponseWriter, request *http.Request) {
-	id := request.URL.Path
+	id := mux.Vars(request)["uuid"]
 	device, found := s.devicesRepository.Get(id)
+
 	if !found {
 		WriteErrorResponse(response, 404, []string{"not found"})
 		return
@@ -79,15 +81,15 @@ func (s *Server) getSignatureDevice(response http.ResponseWriter, request *http.
 }
 
 type signDataWithDeviceParams struct {
-	data string
+	Data string `json:"data"`
 }
 
 func (s *Server) signDataWithDevice(response http.ResponseWriter, request *http.Request) {
-	id := request.URL.Path
+	id := mux.Vars(request)["uuid"]
 	var params signDataWithDeviceParams
 	read, _ := io.ReadAll(request.Body)
 	err := json.Unmarshal(read, &params)
-	signedData, err := domain.SignTransaction(id, params.data, s.devicesRepository)
+	signedData, err := domain.SignTransaction(id, params.Data, s.devicesRepository)
 	if err != nil {
 		WriteErrorResponse(response, 400, []string{err.Error()})
 		return

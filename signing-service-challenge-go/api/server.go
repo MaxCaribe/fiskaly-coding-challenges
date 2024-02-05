@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -32,14 +33,14 @@ func NewServer(listenAddress string, devicesRepository domain.DevicesRepository)
 
 // Run registers all HandlerFuncs for the existing HTTP routes and starts the Server.
 func (s *Server) Run() error {
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 
-	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
-	mux.Handle("/api/v0/devices", http.HandlerFunc(s.Devices))
-	mux.Handle("/api/v0/devices/{id}", http.HandlerFunc(s.Device))
-	mux.Handle("/api/v0/devices/{id}/sign", http.HandlerFunc(s.DeviceSign))
+	router.Handle("/api/v0/health", http.HandlerFunc(s.Health))
+	router.Handle("/api/v0/devices/{uuid}/sign", http.HandlerFunc(s.DeviceSign))
+	router.Handle("/api/v0/devices/{uuid}", http.HandlerFunc(s.Device))
+	router.Handle("/api/v0/devices", http.HandlerFunc(s.Devices))
 
-	return http.ListenAndServe(s.listenAddress, mux)
+	return http.ListenAndServe(s.listenAddress, router)
 }
 
 // WriteInternalError writes a default internal error message as an HTTP response.
