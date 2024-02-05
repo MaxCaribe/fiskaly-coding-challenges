@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
 	"net/http"
 )
 
@@ -17,14 +18,15 @@ type ErrorResponse struct {
 
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
-	listenAddress string
+	listenAddress     string
+	devicesRepository domain.DevicesRepository
 }
 
 // NewServer is a factory to instantiate a new Server.
-func NewServer(listenAddress string) *Server {
+func NewServer(listenAddress string, devicesRepository domain.DevicesRepository) *Server {
 	return &Server{
-		listenAddress: listenAddress,
-		// TODO: add services / further dependencies here ...
+		listenAddress:     listenAddress,
+		devicesRepository: devicesRepository,
 	}
 }
 
@@ -33,8 +35,9 @@ func (s *Server) Run() error {
 	mux := http.NewServeMux()
 
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
-
-	// TODO: register further HandlerFuncs here ...
+	mux.Handle("/api/v0/devices", http.HandlerFunc(s.Devices))
+	mux.Handle("/api/v0/devices/{id}", http.HandlerFunc(s.Device))
+	mux.Handle("/api/v0/devices/{id}/sign", http.HandlerFunc(s.DeviceSign))
 
 	return http.ListenAndServe(s.listenAddress, mux)
 }

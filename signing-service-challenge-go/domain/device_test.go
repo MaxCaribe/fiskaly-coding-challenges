@@ -26,7 +26,7 @@ func (repo *testRepository) Update(device SignatureDevice) error {
 
 func TestCreateSignatureDeviceECC(t *testing.T) {
 	repo := testRepository{storage: make(map[string]SignatureDevice)}
-	device, err := CreateSignatureDevice("ECC", "", &repo)
+	device, err := CreateSignatureDevice(Algorithm(1), "", &repo)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -40,7 +40,7 @@ func TestCreateSignatureDeviceECC(t *testing.T) {
 
 func TestCreateSignatureDeviceRSA(t *testing.T) {
 	repo := testRepository{storage: make(map[string]SignatureDevice)}
-	device, err := CreateSignatureDevice("RSA", "", &repo)
+	device, err := CreateSignatureDevice(Algorithm(2), "", &repo)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -54,7 +54,7 @@ func TestCreateSignatureDeviceRSA(t *testing.T) {
 
 func TestCreateSignatureDeviceInvalid(t *testing.T) {
 	repo := testRepository{storage: make(map[string]SignatureDevice)}
-	_, err := CreateSignatureDevice("SHA", "", &repo)
+	_, err := CreateSignatureDevice(Algorithm(0), "", &repo)
 	if err == nil {
 		t.Errorf("can't create signature device with invalid algorithm")
 	}

@@ -8,13 +8,13 @@ import (
 )
 
 type SignatureDevice struct {
-	UUID             string
-	Label            string
-	PrivateKey       []byte
-	PublicKey        []byte
-	Algorithm        Algorithm
-	SignatureCounter int
-	LastSignature    []byte
+	UUID             string    `json:"uuid"`
+	Label            string    `json:"label"`
+	PrivateKey       []byte    `json:"-"`
+	PublicKey        []byte    `json:"public_key"`
+	Algorithm        Algorithm `json:"algorithm"`
+	SignatureCounter int       `json:"signature_counter"`
+	LastSignature    []byte    `json:"-"`
 }
 
 type DevicesRepository interface {
@@ -39,16 +39,11 @@ type SignatureResponse struct {
 
 // CreateSignatureDevice creates SignatureDevice in store and returns serializable response
 func CreateSignatureDevice(
-	algorithm string,
+	algorithm Algorithm,
 	label string,
 	repo DevicesRepository,
 ) (CreateSignatureDeviceResponse, error) {
-	parsedAlgorithm, err := ParseAlgorithm(algorithm)
-	if err != nil {
-		return CreateSignatureDeviceResponse{}, err
-	}
-
-	keyPairInBytes, err := parsedAlgorithm.GenerateKeyPairsInBytes()
+	keyPairInBytes, err := algorithm.GenerateKeyPairsInBytes()
 	if err != nil {
 		return CreateSignatureDeviceResponse{}, err
 	}
@@ -60,7 +55,7 @@ func CreateSignatureDevice(
 		Label:            label,
 		PrivateKey:       keyPairInBytes.PrivateKey,
 		PublicKey:        keyPairInBytes.PublicKey,
-		Algorithm:        parsedAlgorithm,
+		Algorithm:        algorithm,
 		SignatureCounter: 0,
 		LastSignature:    []byte(lastSignature),
 	}
